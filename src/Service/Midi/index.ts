@@ -61,4 +61,14 @@ export default class MidiService {
     this._midiOutput.close();
     this._midiInput.close();
   }
+
+  public static async requestWebAccess() {
+    if (typeof navigator !== 'undefined' && (navigator as any).requestMIDIAccess) {
+      try {
+        await (navigator as any).requestMIDIAccess({ sysex: true });
+      } catch {
+        // ignore failure in case user rejects access
+      }
+    }
+  }
 }

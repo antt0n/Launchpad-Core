@@ -6,6 +6,10 @@ class LaunchpadCore<T extends StringDrivers> {
   private readonly _instance: MidiService;
   private readonly _driver: DriverMap[T];
 
+  private static isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof navigator !== 'undefined';
+  }
+
   private callbacks: { [e: string]: any[] } = {
     onMidiIn: [],
     onConnected: [],
@@ -14,12 +18,19 @@ class LaunchpadCore<T extends StringDrivers> {
 
   constructor(driverName: T) {
     this._driver = DriverManager.getDriver(driverName);
+
+    if (LaunchpadCore.isBrowser()) {
+      MidiService.requestWebAccess().catch(() => {});
+    }
+
     this._instance = new MidiService(this._driver.MidiIn, this._driver.MidiOut);
 
     this.onEnabled();
 
-    process.on('SIGINT', () => this.onDisabled());
-    process.on('EXIT', () => this.onDisabled());
+    if (typeof process !== 'undefined' && process.on) {
+      process.on('SIGINT', () => this.onDisabled());
+      process.on('EXIT', () => this.onDisabled());
+    }
   }
 
   private async onEnabled() {
