@@ -58,5 +58,7 @@ export default class MidiService {
   public closeAll() {
     this._midiOutput.disconnect();
     this._midiInput.disconnect();
+    this._midiOutput.close();
+    this._midiInput.close();
   }
 }
