@@ -14,6 +14,7 @@ class LaunchpadCore<T extends StringDrivers> {
     onMidiIn: [],
     onConnected: [],
     onDisabled: [],
+    onDisconnected: [],
   };
 
   constructor(driverName: T) {
@@ -23,7 +24,11 @@ class LaunchpadCore<T extends StringDrivers> {
       MidiService.requestWebAccess().catch(() => {});
     }
 
-    this._instance = new MidiService(this._driver.MidiIn, this._driver.MidiOut);
+    this._instance = new MidiService(
+      this._driver.MidiIn,
+      this._driver.MidiOut,
+      () => this.onDisconnected(),
+    );
 
     this.onEnabled();
 
@@ -45,6 +50,10 @@ class LaunchpadCore<T extends StringDrivers> {
     this._instance.closeAll();
   }
 
+  private async onDisconnected() {
+    await this.handleEvent('onDisconnected', this._instance, this._driver);
+  }
+
   /**
    * Events
    */
@@ -55,6 +64,7 @@ class LaunchpadCore<T extends StringDrivers> {
   public on(event: 'onMidiIn', callback: (data: any) => void): void;
   public on(event: 'onConnected', callback: (instance: MidiService, driver: DriverMap[T]) => void): void;
   public on(event: 'onDisabled', callback: (instance: MidiService, driver: DriverMap[T]) => void): void;
+  public on(event: 'onDisconnected', callback: (instance: MidiService, driver: DriverMap[T]) => void): void;
 
   public on(event: string, callback: any) {
     if (!this.callbacks[event]) throw new Error(`Unknown event name: '${event}'`);
