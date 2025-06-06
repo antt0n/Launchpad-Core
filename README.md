@@ -55,7 +55,7 @@ import { createLaunchpadCore } from "launchpadcore";
 
 const App = createLaunchpadCore("LaunchpadX");
 
-App.on("onEnabled", (instance, driver) => {
+App.on("onConnected", (instance, driver) => {
     instance.out.send(driver.textScrolling(15, "Welcome!"))
     instance.out.noteOn(0, 11, 25) // Pad 11 to color 25
 })

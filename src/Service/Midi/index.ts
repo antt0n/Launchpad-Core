@@ -27,13 +27,16 @@ export default class MidiService {
       .openMidiIn(midiIn)
       .or(() => this.midiError());
     this._midiOutput = midi()
-      .openMidiOut(midiIn)
+      .openMidiOut(midiOut)
       .or(() => this.midiError());
   }
 
   private midiError() {
-    if (this._onDisconnect) this._onDisconnect();
-    throw new midiError('Device not connected.');
+    if (this._onDisconnect) {
+      this._onDisconnect();
+    }
+    this.closeAll();
+    console.error(new midiError('Device not connected.'));
   }
 
   private openOutput() {
