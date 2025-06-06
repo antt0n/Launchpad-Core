@@ -1,4 +1,5 @@
-import DriverManager, { DriverMap, StringDrivers } from './Drivers';
+import midi from 'jzz';
+import DriverManager, { DriverMap, StringDrivers, driverMap } from './Drivers';
 import MidiService from './Service/Midi';
 
 class LaunchpadCore<T extends StringDrivers> {
@@ -79,4 +80,27 @@ export { LaunchpadCore };
 
 export function createLaunchpadCore<T extends StringDrivers>(driverName: T) {
   return new LaunchpadCore<T>(driverName);
+}
+
+export async function autoDetectLaunchpadCore() {
+  const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined';
+
+  if (isBrowser) {
+    await MidiService.requestWebAccess().catch(() => {});
+  }
+
+  const engine = midi();
+  await engine.refresh().or(() => {});
+  const info = engine.info();
+
+  for (const name of Object.keys(driverMap) as Array<StringDrivers>) {
+    const driver = driverMap[name];
+    const hasIn = info.inputs.some((p: any) => p.name === driver.MidiIn);
+    const hasOut = info.outputs.some((p: any) => p.name === driver.MidiOut);
+    if (hasIn && hasOut) {
+      return new LaunchpadCore(name);
+    }
+  }
+
+  throw new Error('No compatible Launchpad device found');
 }

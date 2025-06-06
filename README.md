@@ -51,8 +51,9 @@ Launchpad Core offers a driver system to adapt to the different existing models 
 Here is a typical example of what can be done with this module.
 
 ```javascript
-import { createLaunchpadCore } from "launchpadcore";
+import { createLaunchpadCore, autoDetectLaunchpadCore } from "launchpadcore";
 
+// Manual mode
 const App = createLaunchpadCore("LaunchpadX");
 
 App.on("onEnabled", (instance, driver) => {
@@ -67,6 +68,10 @@ App.on("onMidiIn", (data) => {
 App.on("onDisabled", () => {
     console.log("Shutdown...")
 })
+
+// Automatic detection (Node and Browser)
+// Returns the first connected Launchpad supported by the library
+const AutoApp = await autoDetectLaunchpadCore();
 ```
 
 ## What's can I do ?
