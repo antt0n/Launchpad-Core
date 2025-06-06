@@ -20,6 +20,9 @@ For yarn:
   yarn add launchpadcore
 ```
 
+When running in a browser, the library automatically calls
+`navigator.requestMIDIAccess()` to request access to the Web MIDI API.
+
 ## Supported devices
 Launchpad Core offers a driver system to adapt to the different existing models of Novation Launchpad.
 ### MK1
@@ -48,9 +51,9 @@ Launchpad Core offers a driver system to adapt to the different existing models 
 Here is a typical example of what can be done with this module.
 
 ```javascript
-import { LaunchpadCore } from "launchpadcore"
+import { createLaunchpadCore } from "launchpadcore";
 
-const App = new LaunchpadCore("LaunchpadX");
+const App = createLaunchpadCore("LaunchpadX");
 
 App.on("onEnabled", (instance, driver) => {
     instance.out.send(driver.textScrolling(15, "Welcome!"))

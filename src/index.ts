@@ -1,10 +1,14 @@
-import DriverManager, { Drivers, StringDrivers } from './Drivers';
+import DriverManager, { DriverMap, StringDrivers } from './Drivers';
 import MidiService from './Service/Midi';
 
-class LaunchpadCore {
+class LaunchpadCore<T extends StringDrivers> {
   private static _devicesInstance: { [key: string]: MidiService };
   private readonly _instance: MidiService;
-  private readonly _driver: Drivers;
+  private readonly _driver: DriverMap[T];
+
+  private static isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof navigator !== 'undefined';
+  }
 
   private callbacks: { [e: string]: any[] } = {
     onMidiIn: [],
@@ -12,14 +16,21 @@ class LaunchpadCore {
     onDisabled: [],
   };
 
-  constructor(driverName: StringDrivers) {
+  constructor(driverName: T) {
     this._driver = DriverManager.getDriver(driverName);
+
+    if (LaunchpadCore.isBrowser()) {
+      MidiService.requestWebAccess().catch(() => {});
+    }
+
     this._instance = new MidiService(this._driver.MidiIn, this._driver.MidiOut);
-  
+
     this.onEnabled();
 
-    process.on('SIGINT', () => this.onDisabled());
-    process.on('EXIT', () => this.onDisabled());
+    if (typeof process !== 'undefined' && process.on) {
+      process.on('SIGINT', () => this.onDisabled());
+      process.on('EXIT', () => this.onDisabled());
+    }
   }
 
   private async onEnabled() {
@@ -42,8 +53,8 @@ class LaunchpadCore {
   }
 
   public on(event: 'onMidiIn', callback: (data: any) => void): void;
-  public on(event: 'onConnected', callback: (instance: MidiService, driver: any) => void): void;
-  public on(event: 'onDisabled', callback: (instance: MidiService, driver: any) => void): void;
+  public on(event: 'onConnected', callback: (instance: MidiService, driver: DriverMap[T]) => void): void;
+  public on(event: 'onDisabled', callback: (instance: MidiService, driver: DriverMap[T]) => void): void;
 
   public on(event: string, callback: any) {
     if (!this.callbacks[event]) throw new Error(`Unknown event name: '${event}'`);
@@ -60,8 +71,12 @@ class LaunchpadCore {
   /**
    * Get driver of the Launchpad
    */
-  public get driver(): Drivers {
+  public get driver(): DriverMap[T] {
     return this._driver;
   }
 }
 export { LaunchpadCore };
+
+export function createLaunchpadCore<T extends StringDrivers>(driverName: T) {
+  return new LaunchpadCore<T>(driverName);
+}

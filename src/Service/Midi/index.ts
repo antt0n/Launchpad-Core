@@ -1,5 +1,8 @@
 import midi from 'jzz';
 
+type EngineAsync = ReturnType<typeof midi>;
+type JzzPort = ReturnType<EngineAsync['openMidiOut']>;
+
 class midiError extends Error {
   constructor(message: string) {
     super(message);
@@ -8,8 +11,8 @@ class midiError extends Error {
 }
 
 export default class MidiService {
-  private _midiInput = midi().openMidiOut();
-  private _midiOutput = midi().openMidiOut();
+  private _midiInput: JzzPort = midi().openMidiOut();
+  private _midiOutput: JzzPort = midi().openMidiOut();
 
   private _midiIn: string;
   private _midiOut: string;
@@ -40,7 +43,7 @@ export default class MidiService {
     this._midiOutput.close();
   }
 
-  public get out(): any {
+  public get out(): JzzPort {
     this.openOutput();
     setTimeout(() => {
       this.closeOutput();
@@ -48,12 +51,24 @@ export default class MidiService {
     return this._midiOutput;
   }
 
-  public get in(): any {
+  public get in(): JzzPort {
     return this._midiInput;
   }
 
   public closeAll() {
     this._midiOutput.disconnect();
     this._midiInput.disconnect();
+    this._midiOutput.close();
+    this._midiInput.close();
+  }
+
+  public static async requestWebAccess() {
+    if (typeof navigator !== 'undefined' && (navigator as any).requestMIDIAccess) {
+      try {
+        await (navigator as any).requestMIDIAccess({ sysex: true });
+      } catch {
+        // ignore failure in case user rejects access
+      }
+    }
   }
 }
