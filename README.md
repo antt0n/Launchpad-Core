@@ -67,6 +67,10 @@ App.on("onMidiIn", (data) => {
 App.on("onDisabled", () => {
     console.log("Shutdown...")
 })
+
+App.on("onDisconnected", () => {
+    console.log("Device disconnected")
+})
 ```
 
 ## What's can I do ?
@@ -74,9 +78,10 @@ App.on("onDisabled", () => {
 ### Events
 | Name        | Description                |
 | :---------- | :------------------------- |
-| `onConnected` | When connected to Launchpad | 
-| `onDisabled` | When disabled (exit the program) | 
-| `onMidiIn` | When new MIDI message received | 
+| `onConnected` | When connected to Launchpad |
+| `onDisabled` | When disabled (exit the program) |
+| `onDisconnected` | When the device disconnects |
+| `onMidiIn` | When new MIDI message received |
 
 
 ### MIDI methods

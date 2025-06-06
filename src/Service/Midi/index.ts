@@ -16,27 +16,30 @@ export default class MidiService {
 
   private _midiIn: string;
   private _midiOut: string;
+  private _onDisconnect?: () => void;
 
-  constructor(midiIn: string, midiOut: string) {
+  constructor(midiIn: string, midiOut: string, onDisconnect?: () => void) {
     this._midiIn = midiIn;
     this._midiOut = midiOut;
+    this._onDisconnect = onDisconnect;
 
     this._midiInput = midi()
       .openMidiIn(midiIn)
-      .or(() => this.midiError);
+      .or(() => this.midiError());
     this._midiOutput = midi()
       .openMidiOut(midiIn)
-      .or(() => this.midiError);
+      .or(() => this.midiError());
   }
 
-  private get midiError() {
+  private midiError() {
+    if (this._onDisconnect) this._onDisconnect();
     throw new midiError('Device not connected.');
   }
 
   private openOutput() {
     this._midiOutput = midi()
       .openMidiOut(this._midiOut)
-      .or(() => this.midiError);
+      .or(() => this.midiError());
   }
 
   private closeOutput() {
