@@ -1,6 +1,7 @@
-import { createLaunchpadCore } from "../src/";
+import { createLaunchpadCore, autoDetectLaunchpadCore } from "../src/";
 
-const App = createLaunchpadCore("LaunchpadX");
+//const App = createLaunchpadCore("LaunchpadX");
+const App = autoDetectLaunchpadCore();
 
 App.on("onConnected", (instance, driver) => {
     console.log(instance.out.info());
@@ -18,3 +19,4 @@ App.on("onDisabled", (instance, driver) => {
     instance.out.send(driver.programmerToggle(false))
     console.log("Shutdown...")
 })
+

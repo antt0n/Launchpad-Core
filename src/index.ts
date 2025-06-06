@@ -83,12 +83,6 @@ export function createLaunchpadCore<T extends StringDrivers>(driverName: T) {
 }
 
 export async function autoDetectLaunchpadCore() {
-  const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined';
-
-  if (isBrowser) {
-    await MidiService.requestWebAccess().catch(() => {});
-  }
-
   const engine = midi();
   await engine.refresh().or(() => {});
   const info = engine.info();
